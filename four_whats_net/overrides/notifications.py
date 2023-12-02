@@ -1,4 +1,3 @@
-
 import frappe
 from frappe import _
 from frappe.email.doctype.notification.notification import Notification, get_context, json
@@ -35,21 +34,86 @@ class ERPGulfNotification(Notification):
     
     def send_whatsapp_msg(self, doc, context):
         settings = frappe.get_doc("Four Whats Net Configuration")
-        recipients = self.get_receiver_list(doc, context)
-        receiverNumbers = []
+        message = frappe.render_template(self.message, context)
+        start_index = message.find('^')
+        end_index = message.rfind('^')
+        # Extract the data between the delimiters
+        site = message[start_index + 1:end_index]
+        document = self.document_type
+     
+        try:
+            recipients = self.getdata(document,site)
+     
+        except Exception as e:
+            frappe.msgprint(str(e))
+        
         for receipt in recipients:
-            number = receipt
-            if "{" in number:
-                number = frappe.render_template(receipt, context)
-            message=frappe.render_template(self.message, context)        
-            phoneNumber = self.get_receiver_phone_number(number)
-            receiverNumbers.append(phoneNumber)
-            url = f"{settings.api_url}/sendMessage/?instanceid={settings.instance_id}&token={settings.token}&phone={phoneNumber}&body={message}"
-            response = requests.get(url)
-        frappe.msgprint(_(f"Whatsapp message sent to {','.join(receiverNumbers)}"))
+            message = frappe.render_template(self.message, context)   
+            phoneNumber = self.get_receiver_phone_number(receipt)
+            
+            form_data = {
+                'id': phoneNumber,
+                'message': message
+            }
+
+            response = requests.post(settings.api_url, data=form_data)
+            
+            
     
+    def getdata(self,filter_document,filter_site):
+        # Define the doctype and filter criteria
+        doctype = 'Whatsapp Recipient'
+        filter_document = filter_document  # Specify the document value you want to filter for
+        filter_active = '1'  # Specify the 'active' value to filter for
+        filter_site = filter_site  # Specify the 'site' value to filter for
+        recipients=[]
+        # Get all documents of the specified doctype
+        all_documents = frappe.get_all(doctype)
+        
+        # Define the fields to extract from the parent document
+        parent_fields_to_extract = ['name1', 'whatsapp_no', 'active']
+        
+        # Define the fields to extract from each child table entry
+        child_fields_to_extract = ['site', 'document']
+        
+        # Iterate through each parent document
+        for document in all_documents:
+            parent_doc = frappe.get_doc(doctype, document['name'])
+        
+            # Access child table data
+            child_table_data = parent_doc.get('permission')  # Assuming child table field name is 'permission'
+        
+            # Check if any child table entry has the specified 'document', 'active', and 'site' values
+            has_filtered_entries = any(
+                entry.get('document') == filter_document and
+                entry.get('site') == filter_site
+                for entry in child_table_data
+            )
+        
+            # Check if the 'active' field matches the specified value
+            has_filtered_active = str(parent_doc.get('active')) == str(filter_active)
+        
+            # If all filters match, merge selected fields from parent and child entries and log the combined details
+            if has_filtered_entries and has_filtered_active:
+            
+                parent_data = {key: parent_doc.get(key) for key in parent_fields_to_extract}
+            
+        
+                # Merge selected fields from parent with each child table entry
+                for entry in child_table_data:
+                    if (
+                        entry.get('document') == filter_document and
+                        entry.get('site') == filter_site
+                    ):
+                        child_data = {key: entry.get(key) for key in child_fields_to_extract}
+                        merged_data = {**parent_data, **child_data}
+                        
+                        recipients.append(merged_data.get('whatsapp_no'))
+        
+        return recipients
+
     def get_receiver_phone_number(self, number):
-        phoneNumber = number.replace("+","").replace("-","")
+        phoneNumber = number.replace("+", "").replace("-", "")
         if phoneNumber.startswith("+") == True:
             phoneNumber = phoneNumber[1:]
         elif phoneNumber.startswith("00") == True:
@@ -63,4 +127,4 @@ class ERPGulfNotification(Notification):
         if phoneNumber.startswith("0") == True:
             phoneNumber = phoneNumber[1:]
         
-        return phoneNumber   
+        return phoneNumber
