@@ -40,25 +40,27 @@ class ERPGulfNotification(Notification):
         # Extract the data between the delimiters
         site = message[start_index + 1:end_index]
         document = self.document_type
-     
+       
         try:
             recipients = self.getdata(document,site)
      
         except Exception as e:
             frappe.msgprint(str(e))
         
-        for receipt in recipients:
-            message = frappe.render_template(self.message, context)   
-            phoneNumber = self.get_receiver_phone_number(receipt)
-            
-            form_data = {
-                'id': phoneNumber,
-                'message': message
-            }
+        try:
+            for receipt in recipients:
+                message = frappe.render_template(self.message, context)   
+                phoneNumber = self.get_receiver_phone_number(receipt)
+                
+                form_data = {
+                    'id': phoneNumber,
+                    'message': message
+                }
 
-            response = requests.post(settings.api_url, data=form_data)
-            
-            
+                response = requests.post(settings.api_url, data=form_data)
+               
+        except Exception as e:
+            frappe.msgprint(e)        
     
     def getdata(self,filter_document,filter_site):
         # Define the doctype and filter criteria
