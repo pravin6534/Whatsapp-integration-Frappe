@@ -5,6 +5,7 @@ from PIL import Image
 from io import BytesIO
 import os
 import uuid
+import urllib.parse
 
 @frappe.whitelist()
 def initialise(url, key, token):
@@ -47,22 +48,16 @@ def get_qrcode(url, key):
         if isinstance(base64_data, str) and base64_data.startswith('data:image/png;base64,'):
             # Extracting image data from Base64 string
             base64_string = base64_data.split('base64,')[1]
+        
+            # Encode the Base64 string to be URL-safe
+            encoded_data = base64_string.replace('+', '-').replace('/', '_').rstrip('=')
 
-            # Decode Base64 to bytes and create an image
-            img_data = base64.b64decode(base64_string)
-            img = Image.open(BytesIO(img_data))
+            # Construct the URL-encoded data
+            encoded_data_url = urllib.parse.quote(encoded_data, safe='')
 
-            # Generate a random filename for the image
-            filename = f"qr_code_{uuid.uuid4().hex}.png"
-
-            # Specify the file path where the image will be saved
-            file_path = f'/home/rsa/dev-bench/sites/dev.rsainfra.in/public/files/{filename}'
-
-            # Saving the image to the specified file path
-            img.save(file_path)
-            print(f"Image saved as {filename} in /home/rsa/dev-bench/sites/dev.rsainfra.in/public/files/")
-
-            # Return the file path of the saved image
+            # Generate the QR code link using the API endpoint and the encoded URL component
+            file_path = base64_data
+          
             return file_path
         else:
             print("Invalid or missing Base64 image data")

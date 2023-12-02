@@ -41,7 +41,8 @@ frappe.ui.form.on('Whatsapp Setting', {
                     console.log("Success: ", response);
                     if (response.message) {
                         // Attach the image to the attach_image field
-                        frm.set_value('attach_image',"/files/" +response.message);
+                        frm.set_value('attach_image',response.message);
+                        console.log(response.message)
                         frappe.msgprint('Image attached successfully.');
                     } else {
                         frappe.msgprint('Error attaching image.');
