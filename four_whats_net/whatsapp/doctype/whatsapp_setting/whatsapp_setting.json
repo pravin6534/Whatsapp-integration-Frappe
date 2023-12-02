@@ -1,0 +1,99 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-11-27 09:18:07.828755",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "init_url",
+  "qr_url",
+  "get_status",
+  "key",
+  "token",
+  "attach_image",
+  "column_break_cjoqy",
+  "qr_code",
+  "phone_connected",
+  "user_id"
+ ],
+ "fields": [
+  {
+   "fieldname": "init_url",
+   "fieldtype": "Data",
+   "label": "INIT URL"
+  },
+  {
+   "fieldname": "key",
+   "fieldtype": "Data",
+   "label": "KEY"
+  },
+  {
+   "fieldname": "token",
+   "fieldtype": "Data",
+   "label": "TOKEN"
+  },
+  {
+   "fieldname": "qr_url",
+   "fieldtype": "Data",
+   "label": "QR URL"
+  },
+  {
+   "fieldname": "attach_image",
+   "fieldtype": "Attach Image",
+   "label": "IMAGE",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qr_code",
+   "fieldtype": "Image",
+   "label": "QR CODE",
+   "max_height": "10px",
+   "options": "attach_image",
+   "width": "10px"
+  },
+  {
+   "fieldname": "get_status",
+   "fieldtype": "Data",
+   "label": "GET STATUS"
+  },
+  {
+   "fieldname": "phone_connected",
+   "fieldtype": "Data",
+   "label": "PHONE CONNECTED"
+  },
+  {
+   "fieldname": "user_id",
+   "fieldtype": "Data",
+   "label": "USER ID"
+  },
+  {
+   "fieldname": "column_break_cjoqy",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2023-11-27 13:11:24.018753",
+ "modified_by": "Administrator",
+ "module": "Whatsapp",
+ "name": "Whatsapp Setting",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
