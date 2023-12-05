@@ -27,10 +27,62 @@ class ERPGulfNotification(Notification):
         try:
             if self.channel == '4Whats.net':
                 self.send_whatsapp_msg(doc, context)
-        except:
+               
+            elif self.channel == 'Maytapi':  # Changed from 'else self.channel == 'Maytapi':' to 'elif self.channel == 'Maytapi':'
+                self.sendmsg(doc,context)
+                
+        except Exception as e:
+            print(e)
             frappe.log_error(title='Failed to send notification', message=frappe.get_traceback())
         super(ERPGulfNotification, self).send(doc)
+            
         
+    def sendmsg(self,doc,context):
+        frappe.msgprint("sendmsg")
+        try:
+            
+            settings = frappe.get_doc("MAYTAPI CONFIGURATION")
+            maytapi_key = settings.api_key
+            message = frappe.render_template(self.message, context)
+            start_index = message.find('^')
+            end_index = message.rfind('^')
+            # Extract the data between the delimiters
+            site = message[start_index + 1:end_index]
+            document = self.document_type
+        
+            try:
+                recipients = self.getdata(document,site)
+                
+            except Exception as e:
+                frappe.msgprint(str(e))
+            
+            try:
+                for receipt in recipients:
+                    message = frappe.render_template(self.message, context)   
+                    phoneNumber = self.get_receiver_phone_number(receipt)
+                    print(message,phoneNumber)
+                    to_number = phoneNumber  # Replace with the recipient's phone number
+
+                    # Payload for the API request
+                    payload = {
+                        "to_number": to_number,
+                        "type": "text",
+                        "message": message
+                    }
+
+                    headers = {
+                        'x-maytapi-key': maytapi_key,
+                        'content-type': "application/json"
+                    }
+
+                    response = requests.request("POST", settings.api_url, json=payload, headers=headers)
+                    print(response)
+            except Exception as e:
+                frappe.msgprint(str(e))    
+        
+            
+        except Exception as e:
+            frappe.msgprint(str(e))
     
     def send_whatsapp_msg(self, doc, context):
         settings = frappe.get_doc("Four Whats Net Configuration")
