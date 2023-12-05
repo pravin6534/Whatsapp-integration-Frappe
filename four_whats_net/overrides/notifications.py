@@ -38,7 +38,6 @@ class ERPGulfNotification(Notification):
             
         
     def sendmsg(self,doc,context):
-        frappe.msgprint("sendmsg")
         try:
             
             settings = frappe.get_doc("MAYTAPI CONFIGURATION")
